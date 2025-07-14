@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title || '중고나라' %></title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    .shop { color: #0d6efd; }
+    .house { color: #28a745; }
+    .person-lines-fill { color: #6f42c1; }
+    .star { color: #ffc107; }
+    .plus-circle { color: #17a2b8; }
+    .person-circle { color: #6c757d; }
+    .box-arrow-right { color: #dc3545; }
+    .box-arrow-in-right { color: #28a745; }
+    .person-plus { color: #007bff; }
+    .eye { color: #6c757d; }
+    .heart { color: #e83e8c; }
+    .geo-alt { color: #fd7e14; }
+    .image { color: #6c757d; }
+    .pencil { color: #ffc107; }
+    .trash { color: #dc3545; }
+    .check-circle { color: #28a745; }
+    .info-circle { color: #17a2b8; }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="/">
+        <span class="shop"></span> 송주아 중고나라 게시판
+      </a>
+      
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <% if (session?.username) { %>
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <span class="house">🏠</span> 전체 상품
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/myposts">
+                <span class="person-lines-fill">📋</span> 내 상품
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/bookmarks">
+                <span class="star">⭐</span> 찜 목록
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/write">
+                <span class="plus-circle">➕</span> 상품 등록
+              </a>
+            </li>
+          <% } %>
+        </ul>
+        
+        <ul class="navbar-nav">
+          <% if (session?.username) { %>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                <span class="person-circle">👤</span> <%= session.username %>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/myposts">
+                  <span class="person-lines-fill">📋</span> 내 상품 관리
+                </a></li>
+                <li><a class="dropdown-item" href="/bookmarks">
+                  <span class="star">⭐</span> 찜 목록
+                </a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="/logout">
+                  <span class="box-arrow-right">🚪</span> 로그아웃
+                </a></li>
+              </ul>
+            </li>
+          <% } else { %>
+            <li class="nav-item">
+              <a class="nav-link" href="/login">
+                <span class="box-arrow-in-right"></span> 로그인
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/register">
+                <span class="person-plus"></span> 회원가입
+              </a>
+            </li>
+          <% } %>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  
+  <div class="container">
+    <%- body %>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

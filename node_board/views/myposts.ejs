@@ -1,0 +1,192 @@
+<h2>내가 쓴 글</h2>
+
+<!-- 필터링 폼 -->
+<form method="get" class="mb-4">
+  <div class="row g-3">
+    <div class="col-md-4">
+      <select name="category" class="form-select">
+        <option value="">전체 카테고리</option>
+        <% categories.forEach(category => { %>
+          <option value="<%= category.id %>" <%= categoryId == category.id ? 'selected' : '' %>>
+            <%= category.name %>
+          </option>
+        <% }) %>
+      </select>
+    </div>
+    <div class="col-md-4">
+      <select name="sort" class="form-select">
+        <option value="latest" <%= sortBy === 'latest' ? 'selected' : '' %>>최신순</option>
+        <option value="oldest" <%= sortBy === 'oldest' ? 'selected' : '' %>>오래된순</option>
+        <option value="views" <%= sortBy === 'views' ? 'selected' : '' %>>조회수순</option>
+        <option value="likes" <%= sortBy === 'likes' ? 'selected' : '' %>>좋아요순</option>
+      </select>
+    </div>
+    <div class="col-md-2">
+      <button class="btn btn-outline-secondary w-100">적용</button>
+    </div>
+    <div class="col-md-2">
+      <a href="/" class="btn btn-secondary w-100">전체 게시판</a>
+    </div>
+  </div>
+</form>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <a href="/write" class="btn btn-primary">새 글 쓰기</a>
+  </div>
+  <small class="text-muted">총 <%= totalPosts %>개의 글</small>
+</div>
+
+<% if (posts.length === 0) { %>
+  <div class="text-center py-5">
+    <h5 class="text-muted">작성한 글이 없습니다.</h5>
+    <p class="text-muted">첫 번째 글을 작성해보세요!</p>
+    <a href="/write" class="btn btn-primary">글 작성하기</a>
+  </div>
+<% } else { %>
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead class="table-light">
+        <tr>
+          <th style="width: 12%">카테고리</th>
+          <th style="width: 40%">제목</th>
+          <th style="width: 8%">조회수</th>
+          <th style="width: 10%">좋아요</th>
+          <th style="width: 8%">댓글</th>
+          <th style="width: 15%">작성일</th>
+          <th style="width: 7%">관리</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% posts.forEach(post => { %>
+          <tr>
+            <td>
+              <span class="badge bg-secondary"><%= post.categoryName || '미분류' %></span>
+            </td>
+            <td>
+              <a href="/post/<%= post.id %>" class="text-decoration-none fw-bold">
+                <%= post.title %>
+              </a>
+              <% if (post.image) { %>
+                <i class="bi bi-image text-primary ms-1"></i>
+              <% } %>
+            </td>
+            <td>
+              <span class="badge bg-light text-dark"><%= post.views %></span>
+            </td>
+            <td>
+              <span class="text-success">👍 <%= post.like_count %></span>
+              <span class="text-danger">👎 <%= post.dislike_count %></span>
+            </td>
+            <td>
+              <span class="badge bg-info"><%= post.comment_count %></span>
+            </td>
+            <td>
+              <small><%= post.createdAt %></small>
+            </td>
+            <td>
+              <div class="btn-group-vertical btn-group-sm" role="group">
+                <a href="/edit/<%= post.id %>" class="btn btn-outline-warning btn-sm" title="수정">
+                  <i class="bi bi-pencil"></i>
+                </a>
+                <form method="POST" action="/delete/<%= post.id %>?_method=DELETE" class="d-inline">
+                  <button class="btn btn-outline-danger btn-sm" 
+                          onclick="return confirm('정말 삭제하시겠습니까?')" 
+                          title="삭제">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 페이지네이션 -->
+  <% if (totalPages > 1) { %>
+  <nav aria-label="My posts pagination">
+    <ul class="pagination justify-content-center">
+      <!-- 이전 페이지 -->
+      <% if (currentPage > 1) { %>
+        <li class="page-item">
+          <a class="page-link" href="?page=<%= currentPage - 1 %>&category=<%= categoryId %>&sort=<%= sortBy %>">이전</a>
+        </li>
+      <% } %>
+
+      <!-- 페이지 번호들 -->
+      <% 
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, currentPage + 2);
+        
+        if (startPage > 1) { 
+      %>
+        <li class="page-item">
+          <a class="page-link" href="?page=1&category=<%= categoryId %>&sort=<%= sortBy %>">1</a>
+        </li>
+        <% if (startPage > 2) { %>
+          <li class="page-item disabled">
+            <span class="page-link">...</span>
+          </li>
+        <% } %>
+      <% } %>
+
+      <% for (let i = startPage; i <= endPage; i++) { %>
+        <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+          <a class="page-link" href="?page=<%= i %>&category=<%= categoryId %>&sort=<%= sortBy %>"><%= i %></a>
+        </li>
+      <% } %>
+
+      <% if (endPage < totalPages) { %>
+        <% if (endPage < totalPages - 1) { %>
+          <li class="page-item disabled">
+            <span class="page-link">...</span>
+          </li>
+        <% } %>
+        <li class="page-item">
+          <a class="page-link" href="?page=<%= totalPages %>&category=<%= categoryId %>&sort=<%= sortBy %>"><%= totalPages %></a>
+        </li>
+      <% } %>
+
+      <!-- 다음 페이지 -->
+      <% if (currentPage < totalPages) { %>
+        <li class="page-item">
+          <a class="page-link" href="?page=<%= currentPage + 1 %>&category=<%= categoryId %>&sort=<%= sortBy %>">다음</a>
+        </li>
+      <% } %>
+    </ul>
+  </nav>
+  <% } %>
+
+  <!-- 통계 정보 -->
+  <div class="mt-4 p-3 bg-light rounded">
+    <h6>내 글 통계</h6>
+    <div class="row text-center">
+      <div class="col-md-3">
+        <div class="text-primary">
+          <strong><%= totalPosts %></strong>
+          <div class="small">총 게시글</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="text-success">
+          <strong><%= posts.reduce((sum, post) => sum + post.views, 0) %></strong>
+          <div class="small">총 조회수</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="text-warning">
+          <strong><%= posts.reduce((sum, post) => sum + post.like_count, 0) %></strong>
+          <div class="small">총 좋아요</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="text-info">
+          <strong><%= posts.reduce((sum, post) => sum + post.comment_count, 0) %></strong>
+          <div class="small">총 댓글</div>
+        </div>
+      </div>
+    </div>
+  </div>
+<% } %>

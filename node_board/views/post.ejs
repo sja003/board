@@ -1,0 +1,201 @@
+<div class="row">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <div>
+            <% if (post.categoryName) { %>
+              <span class="badge bg-secondary mb-2"><%= post.categoryName %></span>
+            <% } %>
+            <% if (post.tradeStatus === 'sold') { %>
+              <span class="badge bg-secondary mb-2">판매완료</span>
+            <% } else if (post.tradeStatus === 'reserved') { %>
+              <span class="badge bg-warning mb-2">예약중</span>
+            <% } else { %>
+              <span class="badge bg-success mb-2">판매중</span>
+            <% } %>
+            <h3><%= post.title %></h3>
+          </div>
+          <div class="text-end">
+            <small class="text-muted d-block">조회수: <%= post.views %></small>
+            <small class="text-muted">등록일: <%= post.createdAt %></small>
+          </div>
+        </div>
+
+        <div class="price-section mb-4 p-3 bg-light rounded">
+          <h4 class="text-primary mb-0">
+            <%= parseInt(post.price || 0).toLocaleString() %>원
+          </h4>
+          <% if (post.originalPrice && post.originalPrice > 0) { %>
+            <small class="text-muted">정가: <%= parseInt(post.originalPrice).toLocaleString() %>원</small>
+          <% } %>
+        </div>
+
+        <div class="product-info mb-4">
+          <div class="row">
+            <div class="col-md-6">
+              <strong>상품 상태:</strong>
+              <span class="ms-2">
+                <% if (post.productCondition === 'new') { %>새상품
+                <% } else if (post.productCondition === 'like_new') { %>거의 새것
+                <% } else if (post.productCondition === 'used') { %>사용감 있음
+                <% } else if (post.productCondition === 'damaged') { %>고장/파손
+                <% } else { %>-<% } %>
+              </span>
+            </div>
+            <% if (post.tradeLocation) { %>
+              <div class="col-md-6">
+                <strong>거래 지역:</strong>
+                <span class="ms-2">📍 <%= post.tradeLocation %></span>
+              </div>
+            <% } %>
+          </div>
+        </div>
+
+        <% if (post.image) { %>
+          <div class="mb-4">
+            <img src="/uploads/<%= post.image %>" alt="상품 이미지" class="img-fluid rounded border">
+          </div>
+        <% } %>
+
+        <div class="product-description mb-4">
+          <h6>상품 설명</h6>
+          <div class="border rounded p-3">
+            <%= post.content.replace(/\n/g, '<br>') %>
+          </div>
+        </div>
+
+        <div class="d-flex gap-2 mb-4">
+          <form method="POST" action="/post/<%= post.id %>/like" class="d-inline">
+            <input type="hidden" name="type" value="like">
+            <button class="btn btn-outline-success <%= userLikeType === 'like' ? 'active' : '' %>">
+              👍 좋아요 (<%= post.like_count %>)
+            </button>
+          </form>
+          
+          <form method="POST" action="/post/<%= post.id %>/like" class="d-inline">
+            <input type="hidden" name="type" value="dislike">
+            <button class="btn btn-outline-danger <%= userLikeType === 'dislike' ? 'active' : '' %>">
+              👎 싫어요 (<%= post.dislike_count %>)
+            </button>
+          </form>
+
+          <form method="POST" action="/post/<%= post.id %>/bookmark" class="d-inline">
+            <button class="btn btn-outline-warning <%= isBookmarked ? 'active' : '' %>">
+              <% if (isBookmarked) { %>
+                ⭐ 찜 해제
+              <% } else { %>
+                ☆ 찜하기
+              <% } %>
+            </button>
+          </form>
+        </div>
+
+        <% if (session.userId === post.userId) { %>
+          <div class="mb-4">
+            <a href="/edit/<%= post.id %>" class="btn btn-warning">상품 수정</a>
+            <form method="POST" action="/delete/<%= post.id %>?_method=DELETE" class="d-inline">
+              <button class="btn btn-danger" onclick="return confirm('정말 삭제하시겠습니까?')">상품 삭제</button>
+            </form>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header">
+        <h6 class="mb-0">판매자 정보</h6>
+      </div>
+      <div class="card-body">
+        <div class="text-center mb-3">
+          <div class="seller-avatar mb-2">
+            <span style="font-size: 3rem;">👤</span>
+          </div>
+          <h6><%= post.username %></h6>
+        </div>
+
+        <% if (session.userId !== post.userId) { %>
+          <% if (post.contactPhone || post.contactKakao) { %>
+            <div class="contact-info">
+              <h6>연락처</h6>
+              <% if (post.contactPhone) { %>
+                <div class="mb-2">
+                  <strong>전화:</strong> 
+                  <a href="tel:<%= post.contactPhone %>" class="text-decoration-none">
+                    <%= post.contactPhone %>
+                  </a>
+                </div>
+              <% } %>
+              <% if (post.contactKakao) { %>
+                <div class="mb-2">
+                  <strong>카카오톡:</strong> <%= post.contactKakao %>
+                </div>
+              <% } %>
+            </div>
+          <% } %>
+        <% } %>
+
+        <div class="mt-3">
+          <small class="text-muted">
+            이 게시글은 <%= post.createdAt %>에 등록되었습니다.
+          </small>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-3">
+      <a href="/" class="btn btn-secondary w-100">목록으로 돌아가기</a>
+    </div>
+  </div>
+</div>
+
+<div class="row mt-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h6 class="mb-0">문의하기 (<%= comments.length %>)</h6>
+      </div>
+      <div class="card-body">
+        <% if (session.userId) { %>
+          <form method="POST" action="/post/<%= post.id %>/comments" class="mb-4">
+            <div class="mb-3">
+              <textarea class="form-control" name="content" rows="3" placeholder="궁금한 점을 문의해주세요..." required></textarea>
+            </div>
+            <button class="btn btn-primary">문의 등록</button>
+          </form>
+        <% } %>
+
+        <% if (comments.length === 0) { %>
+          <p class="text-muted text-center py-4">아직 문의가 없습니다.</p>
+        <% } else { %>
+          <div class="comments-list">
+            <% comments.forEach(comment => { %>
+              <div class="comment-item border-bottom pb-3 mb-3">
+                <div class="d-flex justify-content-between align-items-start">
+                  <div class="flex-grow-1">
+                    <div class="mb-2">
+                      <strong><%= comment.username %></strong>
+                      <small class="text-muted ms-2"><%= comment.createdAt %></small>
+                    </div>
+                    <div><%= comment.content %></div>
+                  </div>
+                  
+                  <% if (session.userId === comment.userId) { %>
+                    <div class="ms-3">
+                      <a href="/comments/<%= comment.id %>/edit" class="btn btn-sm btn-outline-secondary">수정</a>
+                      <form method="POST" action="/comments/<%= comment.id %>?_method=DELETE" class="d-inline">
+                        <button class="btn btn-sm btn-outline-danger" onclick="return confirm('문의를 삭제하시겠습니까?')">삭제</button>
+                      </form>
+                    </div>
+                  <% } %>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>

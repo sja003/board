@@ -1,0 +1,70 @@
+<h2>내 북마크</h2>
+
+<div class="mb-3">
+  <a href="/" class="btn btn-secondary">게시판으로 돌아가기</a>
+</div>
+
+<% if (bookmarks.length === 0) { %>
+  <div class="text-center py-5">
+    <h5 class="text-muted">북마크한 게시글이 없습니다.</h5>
+    <p class="text-muted">관심있는 게시글에 북마크를 추가해보세요!</p>
+    <a href="/" class="btn btn-primary">게시판 둘러보기</a>
+  </div>
+<% } else { %>
+  <div class="row">
+    <% bookmarks.forEach(bookmark => { %>
+      <div class="col-md-6 mb-3">
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <span class="badge bg-secondary"><%= bookmark.categoryName || '미분류' %></span>
+              <small class="text-muted">북마크: <%= bookmark.bookmarkedAt %></small>
+            </div>
+            
+            <h6 class="card-title">
+              <a href="/post/<%= bookmark.id %>" class="text-decoration-none">
+                <%= bookmark.title %>
+              </a>
+            </h6>
+            
+            <p class="card-text text-muted small">
+              <%= bookmark.content.length > 100 ? bookmark.content.substring(0, 100) + '...' : bookmark.content %>
+            </p>
+            
+            <div class="d-flex justify-content-between align-items-center">
+              <small class="text-muted">
+                작성자: <%= bookmark.username %> | 조회수: <%= bookmark.views %>
+              </small>
+              <small class="text-muted"><%= bookmark.createdAt %></small>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+
+  <!-- 페이지네이션 -->
+  <% if (totalPages > 1) { %>
+  <nav aria-label="Bookmark pagination">
+    <ul class="pagination justify-content-center">
+      <% if (currentPage > 1) { %>
+        <li class="page-item">
+          <a class="page-link" href="?page=<%= currentPage - 1 %>">이전</a>
+        </li>
+      <% } %>
+
+      <% for (let i = 1; i <= totalPages; i++) { %>
+        <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+          <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+        </li>
+      <% } %>
+
+      <% if (currentPage < totalPages) { %>
+        <li class="page-item">
+          <a class="page-link" href="?page=<%= currentPage + 1 %>">다음</a>
+        </li>
+      <% } %>
+    </ul>
+  </nav>
+  <% } %>
+<% } %>

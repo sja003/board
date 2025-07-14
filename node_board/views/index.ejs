@@ -1,0 +1,256 @@
+<h2>🛒 중고나라</h2>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <form method="get">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <input type="text" class="form-control" name="q" value="<%= query || '' %>" placeholder="상품명 검색">
+        </div>
+        <div class="col-md-3">
+          <select name="category" class="form-select">
+            <option value="">전체 카테고리</option>
+            <% categories.forEach(category => { %>
+              <option value="<%= category.id %>" <%= categoryId == category.id ? 'selected' : '' %>>
+                <%= category.name %>
+              </option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <select name="sort" class="form-select">
+            <option value="latest" <%= sortBy === 'latest' ? 'selected' : '' %>>최신순</option>
+            <option value="oldest" <%= sortBy === 'oldest' ? 'selected' : '' %>>오래된순</option>
+            <option value="price_low" <%= sortBy === 'price_low' ? 'selected' : '' %>>낮은가격순</option>
+            <option value="price_high" <%= sortBy === 'price_high' ? 'selected' : '' %>>높은가격순</option>
+            <option value="views" <%= sortBy === 'views' ? 'selected' : '' %>>조회수순</option>
+            <option value="likes" <%= sortBy === 'likes' ? 'selected' : '' %>>좋아요순</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-outline-secondary w-100">검색</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <a href="/write" class="btn btn-primary">
+      <span class="plus-circle">➕</span> 상품 등록
+    </a>
+    <a href="/bookmarks" class="btn btn-outline-warning">
+      <span class="star">⭐</span> 찜 목록
+    </a>
+    <a href="/myposts" class="btn btn-outline-info">
+      <span class="person-circle">👤</span> 내 상품
+    </a>
+  </div>
+  <small class="text-muted">총 <%= totalPosts %>개의 상품</small>
+</div>
+
+<% if (posts.length === 0) { %>
+  <div class="text-center py-5">
+    <div class="mb-4">
+      <span style="font-size: 4rem;">🛒</span>
+    </div>
+    <h5 class="text-muted">등록된 상품이 없습니다</h5>
+    <p class="text-muted">첫 번째 상품을 등록해보세요!</p>
+    <a href="/write" class="btn btn-primary">상품 등록하기</a>
+  </div>
+<% } else { %>
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead class="table-light">
+        <tr>
+          <th style="width: 80px;">이미지</th>
+          <th style="width: 12%;">카테고리</th>
+          <th style="width: 40%;">상품명</th>
+          <th style="width: 15%;">가격</th>
+          <th style="width: 10%;">상태</th>
+          <th style="width: 8%;">조회수</th>
+          <th style="width: 10%;">좋아요</th>
+          <th style="width: 10%;">작성자</th>
+          <th style="width: 15%;">작성일</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% posts.forEach(post => { %>
+          <tr class="product-row">
+            <td class="align-middle">
+              <% if (post.image) { %>
+                <img src="/uploads/<%= post.image %>" alt="상품이미지" class="product-thumbnail">
+              <% } else { %>
+                <div class="no-thumbnail">
+                  <span>🖼️</span>
+                </div>
+              <% } %>
+            </td>
+            <td class="align-middle">
+              <span class="badge bg-secondary"><%= post.categoryName || '기타' %></span>
+            </td>
+            <td class="align-middle">
+              <div class="d-flex align-items-center">
+                <div>
+                  <a href="/post/<%= post.id %>" class="text-decoration-none fw-bold product-title">
+                    <%= post.title %>
+                  </a>
+                  <div class="mt-1">
+                    <% if (post.tradeStatus === 'sold') { %>
+                      <span class="badge bg-secondary me-1">판매완료</span>
+                    <% } else if (post.tradeStatus === 'reserved') { %>
+                      <span class="badge bg-warning me-1">예약중</span>
+                    <% } else { %>
+                      <span class="badge bg-success me-1">판매중</span>
+                    <% } %>
+                    <% if (post.tradeLocation) { %>
+                      <small class="text-muted">📍 <%= post.tradeLocation %></small>
+                    <% } %>
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td class="align-middle">
+              <div class="price-info">
+                <strong class="text-primary">
+                  <%= parseInt(post.price || 0).toLocaleString() %>원
+                </strong>
+              </div>
+            </td>
+            <td class="align-middle">
+              <small class="text-muted">
+                <% if (post.productCondition === 'new') { %>새상품
+                <% } else if (post.productCondition === 'like_new') { %>거의 새것
+                <% } else if (post.productCondition === 'used') { %>사용감 있음
+                <% } else if (post.productCondition === 'damaged') { %>고장/파손
+                <% } else { %>-<% } %>
+              </small>
+            </td>
+            <td class="align-middle">
+              <span class="badge bg-light text-dark">
+                👁️ <%= post.views %>
+              </span>
+            </td>
+            <td class="align-middle">
+              <div class="d-flex gap-1">
+                <span class="text-success small">👍 <%= post.like_count %></span>
+                <span class="text-danger small">👎 <%= post.dislike_count %></span>
+              </div>
+            </td>
+            <td class="align-middle">
+              <%= post.username %>
+            </td>
+            <td class="align-middle date-column">
+              <small><%= post.createdAt %></small>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+<% } %>
+
+<% if (totalPages > 1) { %>
+<nav aria-label="상품 페이지네이션" class="mt-4">
+  <ul class="pagination justify-content-center">
+    <% if (currentPage > 1) { %>
+      <li class="page-item">
+        <a class="page-link" href="?page=<%= currentPage - 1 %>&q=<%= query || '' %>&category=<%= categoryId %>&sort=<%= sortBy %>">이전</a>
+      </li>
+    <% } %>
+
+    <% 
+      let startPage = Math.max(1, currentPage - 2);
+      let endPage = Math.min(totalPages, currentPage + 2);
+      
+      if (startPage > 1) { 
+    %>
+      <li class="page-item">
+        <a class="page-link" href="?page=1&q=<%= query || '' %>&category=<%= categoryId %>&sort=<%= sortBy %>">1</a>
+      </li>
+      <% if (startPage > 2) { %>
+        <li class="page-item disabled">
+          <span class="page-link">...</span>
+        </li>
+      <% } %>
+    <% } %>
+
+    <% for (let i = startPage; i <= endPage; i++) { %>
+      <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+        <a class="page-link" href="?page=<%= i %>&q=<%= query || '' %>&category=<%= categoryId %>&sort=<%= sortBy %>"><%= i %></a>
+      </li>
+    <% } %>
+
+    <% if (endPage < totalPages) { %>
+      <% if (endPage < totalPages - 1) { %>
+        <li class="page-item disabled">
+          <span class="page-link">...</span>
+        </li>
+      <% } %>
+      <li class="page-item">
+        <a class="page-link" href="?page=<%= totalPages %>&q=<%= query || '' %>&category=<%= categoryId %>&sort=<%= sortBy %>"><%= totalPages %></a>
+      </li>
+    <% } %>
+
+    <% if (currentPage < totalPages) { %>
+      <li class="page-item">
+        <a class="page-link" href="?page=<%= currentPage + 1 %>&q=<%= query || '' %>&category=<%= categoryId %>&sort=<%= sortBy %>">다음</a>
+      </li>
+    <% } %>
+  </ul>
+</nav>
+<% } %>
+
+<style>
+.product-thumbnail {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.no-thumbnail {
+  width: 60px;
+  height: 60px;
+  background-color: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.product-row:hover {
+  background-color: #f8f9fa;
+}
+
+.product-title {
+  color: #333;
+  font-size: 1rem;
+}
+
+.product-title:hover {
+  color: #0d6efd !important;
+}
+
+.price-info {
+  font-size: 1.1rem;
+}
+
+.badge {
+  font-size: 0.75rem;
+}
+
+.table td {
+  vertical-align: middle;
+}
+
+.date-column {
+  white-space: nowrap;
+  font-size: 0.85rem;
+  min-width: 120px;
+}
+</style>
